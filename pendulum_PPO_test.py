@@ -104,4 +104,4 @@ for timestep in range(max_timesteps):
 env.close()
 
 # Save frames as a GIF
-imageio.mimsave("ppo_pendulum.gif", [np.array(frame) for frame in frames], fps=30)
+imageio.mimsave("pendulum_PPO.gif", [np.array(frame) for frame in frames], fps=30)
