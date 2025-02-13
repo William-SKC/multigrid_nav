@@ -8,11 +8,11 @@ from minigrid.wrappers import FullyObsWrapper, ImgObsWrapper
 from skrl.agents.torch.ppo import PPO, PPO_DEFAULT_CONFIG
 from skrl.envs.wrappers.torch import wrap_env
 from skrl.memories.torch import RandomMemory
-from skrl.models.torch import CategoricalMixin, Model
+from skrl.models.torch import CategoricalMixin, DeterministicMixin, Model
 from minigrid_extractor import MinigridFeaturesExtractor
 
 # ✅ Load the trained PPO model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MiniGrid/25-02-08_16-58-41-886530_PPO/checkpoints/best_agent.pt"  # Change if needed
+CHECKPOINT_PATH = "runs/torch/MiniGrid/25-02-12_14-37-25-193657_PPO/checkpoints/best_agent.pt"  # Change if needed
 
 # ✅ Load & Wrap MiniGrid Environment
 env = gym.make("MiniGrid-Empty-16x16-v0", render_mode="rgb_array") 
@@ -45,10 +45,10 @@ class Policy(CategoricalMixin, Model):
 
 
 # 🧠 Define Value Model (Critic)
-class Value(CategoricalMixin, Model):
+class Value(DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device):
         Model.__init__(self, observation_space, action_space, device)
-        CategoricalMixin.__init__(self)  # ✅ Inherit to avoid act() error
+        DeterministicMixin.__init__(self)  # ✅ Inherit to avoid act() error
 
         self.feature_extractor = MinigridFeaturesExtractor(observation_space, features_dim=512)
 
@@ -86,19 +86,19 @@ print(f"✅ Loaded PPO model from {CHECKPOINT_PATH}")
 frames = []
 obs, _ = env.reset()
 done = False
-timestep = 0
 max_timesteps = 200  # Change if you want longer/shorter videos
 
-for _ in range(max_timesteps):
+for timestep in range(max_timesteps):
     output = agent.act(obs,
                             timestep=timestep, timesteps=max_timesteps)
     actions = output[-1].get("mean_actions", output[0])
+    # print(output)
+    # print('actions:', actions)
 
     obs, _, terminated, truncated, _ = env.step(actions)
     
     frames.append(env.render())  # Capture frame
     done = terminated or truncated
-    timestep += 1
 
     if done:
         break  # Stop if agent reaches goal

@@ -7,7 +7,7 @@ from minigrid.wrappers import FullyObsWrapper, ImgObsWrapper
 from skrl.agents.torch.ppo import PPO, PPO_DEFAULT_CONFIG
 from skrl.envs.wrappers.torch import wrap_env
 from skrl.memories.torch import RandomMemory
-from skrl.models.torch import CategoricalMixin, Model
+from skrl.models.torch import CategoricalMixin, DeterministicMixin, Model
 from skrl.trainers.torch import SequentialTrainer
 from skrl.utils import set_seed
 from minigrid_extractor import MinigridFeaturesExtractor
@@ -54,10 +54,10 @@ class Policy(CategoricalMixin, Model):
 
 
 # 🧠 Define Value Model (Critic)
-class Value(CategoricalMixin, Model):
+class Value(DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device):
         Model.__init__(self, observation_space, action_space, device)
-        CategoricalMixin.__init__(self)  # ✅ Inherit to avoid act() error
+        DeterministicMixin.__init__(self)  
 
         self.feature_extractor = MinigridFeaturesExtractor(observation_space, features_dim=512)
 
