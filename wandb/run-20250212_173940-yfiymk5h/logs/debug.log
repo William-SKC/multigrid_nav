@@ -1,0 +1,117 @@
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_setup.py:_flush():68] Current SDK version is 0.19.6
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_setup.py:_flush():68] Configure stats pid to 59244
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_setup.py:_flush():68] Loading settings from /Users/shengkangchen/.config/wandb/settings
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_setup.py:_flush():68] Loading settings from /Users/shengkangchen/Documents/multigrid_nav/wandb/settings
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_setup.py:_flush():68] Loading settings from environment variables
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_init.py:setup_run_log_directory():637] Logging user logs to /Users/shengkangchen/Documents/multigrid_nav/wandb/run-20250212_173940-yfiymk5h/logs/debug.log
+2025-02-12 17:39:40,307 INFO    MainThread:59244 [wandb_init.py:setup_run_log_directory():638] Logging internal logs to /Users/shengkangchen/Documents/multigrid_nav/wandb/run-20250212_173940-yfiymk5h/logs/debug-internal.log
+2025-02-12 17:39:40,315 INFO    MainThread:59244 [wandb_init.py:init():756] calling init triggers
+2025-02-12 17:39:40,315 INFO    MainThread:59244 [wandb_init.py:init():761] wandb.init called with sweep_config: {}
+config: {'rollouts': 32, 'learning_epochs': 5, 'mini_batches': 8, 'discount_factor': 0.99, 'lambda': 0.95, 'learning_rate': 0.0003, 'learning_rate_scheduler': <class 'skrl.resources.schedulers.torch.kl_adaptive.KLAdaptiveLR'>, 'learning_rate_scheduler_kwargs': {'kl_threshold': 0.008}, 'state_preprocessor': None, 'state_preprocessor_kwargs': {}, 'value_preprocessor': None, 'value_preprocessor_kwargs': {}, 'random_timesteps': 0, 'learning_starts': 0, 'grad_norm_clip': 1.0, 'ratio_clip': 0.2, 'value_clip': 0.2, 'clip_predicted_values': True, 'entropy_loss_scale': 0.001, 'value_loss_scale': 1.0, 'kl_threshold': 0, 'rewards_shaper': None, 'time_limit_bootstrap': False, 'mixed_precision': False, 'experiment': {'directory': 'runs/torch/MultiGrid_IPPO', 'experiment_name': '', 'write_interval': 200, 'checkpoint_interval': 2000, 'store_separately': False, 'wandb': True, 'wandb_kwargs': {'name': 'IPPO'}}, 'timesteps': 20000, 'headless': True, 'disable_progressbar': False, 'close_environment_at_exit': True, 'environment_info': 'episode', 'stochastic_evaluation': False, 0: {'policy': OrderedDict([('feature_extractor', MinigridFeaturesExtractor(
+  (cnn): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(2, 2), stride=(1, 1))
+    (1): ReLU()
+    (2): Conv2d(16, 32, kernel_size=(2, 2), stride=(1, 1))
+    (3): ReLU()
+    (4): Conv2d(32, 64, kernel_size=(2, 2), stride=(1, 1))
+    (5): ReLU()
+    (6): Flatten(start_dim=1, end_dim=-1)
+  )
+  (linear): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): ReLU()
+  )
+)), ('policy_net', Sequential(
+  (0): Linear(in_features=512, out_features=128, bias=True)
+  (1): ReLU()
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): ReLU()
+  (4): Linear(in_features=128, out_features=7, bias=True)
+))]), 'value': OrderedDict([('feature_extractor', MinigridFeaturesExtractor(
+  (cnn): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(2, 2), stride=(1, 1))
+    (1): ReLU()
+    (2): Conv2d(16, 32, kernel_size=(2, 2), stride=(1, 1))
+    (3): ReLU()
+    (4): Conv2d(32, 64, kernel_size=(2, 2), stride=(1, 1))
+    (5): ReLU()
+    (6): Flatten(start_dim=1, end_dim=-1)
+  )
+  (linear): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): ReLU()
+  )
+)), ('value_net', Sequential(
+  (0): Linear(in_features=512, out_features=128, bias=True)
+  (1): ReLU()
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): ReLU()
+  (4): Linear(in_features=128, out_features=1, bias=True)
+))])}, 1: {'policy': OrderedDict([('feature_extractor', MinigridFeaturesExtractor(
+  (cnn): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(2, 2), stride=(1, 1))
+    (1): ReLU()
+    (2): Conv2d(16, 32, kernel_size=(2, 2), stride=(1, 1))
+    (3): ReLU()
+    (4): Conv2d(32, 64, kernel_size=(2, 2), stride=(1, 1))
+    (5): ReLU()
+    (6): Flatten(start_dim=1, end_dim=-1)
+  )
+  (linear): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): ReLU()
+  )
+)), ('policy_net', Sequential(
+  (0): Linear(in_features=512, out_features=128, bias=True)
+  (1): ReLU()
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): ReLU()
+  (4): Linear(in_features=128, out_features=7, bias=True)
+))]), 'value': OrderedDict([('feature_extractor', MinigridFeaturesExtractor(
+  (cnn): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(2, 2), stride=(1, 1))
+    (1): ReLU()
+    (2): Conv2d(16, 32, kernel_size=(2, 2), stride=(1, 1))
+    (3): ReLU()
+    (4): Conv2d(32, 64, kernel_size=(2, 2), stride=(1, 1))
+    (5): ReLU()
+    (6): Flatten(start_dim=1, end_dim=-1)
+  )
+  (linear): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): ReLU()
+  )
+)), ('value_net', Sequential(
+  (0): Linear(in_features=512, out_features=128, bias=True)
+  (1): ReLU()
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): ReLU()
+  (4): Linear(in_features=128, out_features=1, bias=True)
+))])}, '_wandb': {}}
+2025-02-12 17:39:40,315 INFO    MainThread:59244 [wandb_init.py:init():789] starting backend
+2025-02-12 17:39:40,530 INFO    MainThread:59244 [wandb_init.py:init():793] sending inform_init request
+2025-02-12 17:39:40,559 INFO    MainThread:59244 [backend.py:_multiprocessing_setup():97] multiprocessing start_methods=spawn,fork,forkserver, using: spawn
+2025-02-12 17:39:40,560 INFO    MainThread:59244 [wandb_init.py:init():808] backend started and connected
+2025-02-12 17:39:40,561 ERROR   MainThread:59244 [wandb_init.py:init():1481] error in wandb.init()
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1471, in init
+    return wi.init(run_settings, run_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 811, in init
+    run = Run(
+          ^^^^
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 573, in __init__
+    self._init(
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 666, in _init
+    self._config._update(config, allow_val_change=True, ignore_locked=True)
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_config.py", line 180, in _update
+    sanitized = self._sanitize_dict(
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_config.py", line 267, in _sanitize_dict
+    k, v = self._sanitize(k, v, allow_val_change)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/multigrid_m4/lib/python3.11/site-packages/wandb/sdk/wandb_config.py", line 280, in _sanitize
+    key = key.strip("-")
+          ^^^^^^^^^
+AttributeError: 'int' object has no attribute 'strip'
+2025-02-12 17:39:40,669 WARNING MsgRouterThr:59244 [router.py:message_loop():75] message_loop has been closed

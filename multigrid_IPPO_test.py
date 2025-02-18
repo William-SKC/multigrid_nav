@@ -11,37 +11,24 @@ from skrl.envs.wrappers.torch import wrap_env
 from skrl.memories.torch import RandomMemory
 from skrl.models.torch import CategoricalMixin, DeterministicMixin, Model
 from skrl.trainers.torch import SequentialTrainer
+from skrl.resources.schedulers.torch import KLAdaptiveRL
+from skrl.resources.preprocessors.torch import RunningStandardScaler
 from skrl.utils import set_seed
 
 # Import CNN Feature Extractor
 from minigrid_extractor import MinigridFeaturesExtractor  
 
 # ✅ Load the trained PPO model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MultiGrid_IPPO/25-02-12_14-02-27-510734_IPPO/checkpoints/agent_200000.pt"  # Change if needed
+CHECKPOINT_PATH = "runs/torch/MultiGrid_IPPO/25-02-18_12-53-34-890578_IPPO/checkpoints/agent_100000.pt"  # Change if needed
 
 # ✅ Load MultiGrid Environment
-num_agents = 2
+num_agents = 3
 env = gym.make('MultiGrid-Empty-8x8-v0', agents=num_agents, render_mode="rgb_array")
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
-env_core = env.unwrapped
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ✅ Get agent IDs dynamically
-agent_ids = list(map(int, env_core.agent_dict.keys()))
-
-# ✅ Reset environment and check shapes
-obs, _ = env.reset()
-print("Observation Shape (Per Agent):", obs[0].shape)
-
-# ✅ Extract correct observation and action spaces (ONLY IMAGE)
-observation_spaces = {agent_id: env_core.observation_space[agent_id]["image"] for agent_id in agent_ids}
-action_spaces = {agent_id: env_core.action_space[agent_id] for agent_id in agent_ids}
-
-print("Agents:", agent_ids)
-print("Observation Spaces:", observation_spaces)
-print("Action Spaces:", action_spaces)
-
 
 # 🧠 Define Policy Model (CNN Feature Extractor)
 class Policy(CategoricalMixin, Model):
@@ -58,7 +45,6 @@ class Policy(CategoricalMixin, Model):
             nn.ReLU(),
             nn.Linear(128, self.num_actions)
         )
-        self.log_std_parameter = nn.Parameter(torch.zeros(self.num_actions))
 
     def compute(self, inputs, role):
         features = self.feature_extractor(inputs["states"])
@@ -89,22 +75,27 @@ class Value(DeterministicMixin, Model):
 
 # 🔧 Define Separate Models for Each Agent
 models = {
-    agent_id: {
-        "policy": Policy(observation_spaces[agent_id], action_spaces[agent_id], device),
-        "value": Value(observation_spaces[agent_id], action_spaces[agent_id], device)
+    agent_name : {
+        "policy": Policy(env.observation_space(agent_name), env.action_space(agent_name), device),
+        "value": Value(env.observation_space(agent_name), env.action_space(agent_name), device)
     }
-    for agent_id in agent_ids
+    for agent_name in env.possible_agents
 }
 
+cfg = IPPO_DEFAULT_CONFIG.copy()
+cfg["state_preprocessor"] = RunningStandardScaler
+cfg["state_preprocessor_kwargs"] = {"size": next(iter(env.observation_spaces.values())), "device": device}
+cfg["value_preprocessor"] = RunningStandardScaler
+cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 # ✅ Load the trained IPPO model
 trained_agent = IPPO(
-        possible_agents = agent_ids,
+        possible_agents = env.possible_agents,
         models=models,
         memories=None,  
-        cfg=IPPO_DEFAULT_CONFIG,
-        observation_spaces=observation_spaces,
-        action_spaces=action_spaces,
+        cfg=cfg,
+        observation_spaces=env.observation_spaces,
+        action_spaces=env.action_spaces,
         device=device
     )
 
@@ -123,11 +114,9 @@ for timestep in range(max_timesteps):
     #     print('obs: ', id, ob.shape)
     output = trained_agent.act(obs, timestep=timestep, timesteps=max_timesteps)
     actions = output[-1].get("mean_actions", output[0])
-    print(output)
-    print('actions:', actions)
 
     # Step the environment
-    obs, _, terminated, truncated, _ = env.step(actions)
+    obs, rewards, terminated, truncated, info = env.step(actions)
     
     # Render and store frames
     frame = env.render()

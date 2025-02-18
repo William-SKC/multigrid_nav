@@ -9,6 +9,8 @@ from skrl.envs.wrappers.torch import wrap_env
 from skrl.memories.torch import RandomMemory
 from skrl.models.torch import CategoricalMixin, DeterministicMixin, Model
 from skrl.trainers.torch import SequentialTrainer
+from skrl.resources.schedulers.torch import KLAdaptiveRL
+from skrl.resources.preprocessors.torch import RunningStandardScaler
 from skrl.utils import set_seed
 
 # Import CNN Feature Extractor
@@ -19,31 +21,19 @@ set_seed(42)
 
 # ✅ Load & Wrap MultiGrid Environment
 num_agents = 2
-env = gym.make('MultiGrid-Empty-8x8-v0', agents=num_agents, render_mode="rgb_array")
+env = gym.make('MultiGrid-Empty-5x5-v0', agents=num_agents)
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 env_core = env.unwrapped
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# ✅ Get agent IDs dynamically
-agent_ids = list(map(int, env_core.agent_dict.keys()))
 
 # ✅ Reset environment and check shapes
 obs, _ = env.reset()
 print("Observation Shape (Per Agent):", obs[0].shape)
 
 # ✅ Extract correct observation and action spaces (ONLY IMAGE)
-observation_spaces = {agent_id: env_core.observation_space[agent_id]["image"] for agent_id in agent_ids}
-action_spaces = {agent_id: env_core.action_space[agent_id] for agent_id in agent_ids}
-
-print("Agents:", agent_ids)
-print("Observation Spaces:", observation_spaces)
-print("Action Spaces:", action_spaces)
-
-# 🔄 Setup Memory Buffer (for each agent)
-memories = {
-    agent_id: RandomMemory(memory_size=1024, num_envs=env.num_envs, device=device)
-    for agent_id in agent_ids
-}
+print("Agents:", env.possible_agents)
+print("Observation Spaces:", env.observation_spaces)
+print("Action Spaces:", env.action_spaces)
 
 
 # 🧠 Define Policy Model (CNN Feature Extractor)
@@ -61,7 +51,6 @@ class Policy(CategoricalMixin, Model):
             nn.ReLU(),
             nn.Linear(128, self.num_actions)
         )
-        self.log_std_parameter = nn.Parameter(torch.zeros(self.num_actions))
 
     def compute(self, inputs, role):
         features = self.feature_extractor(inputs["states"])
@@ -92,56 +81,59 @@ class Value(DeterministicMixin, Model):
 
 # 🔧 Define Separate Models for Each Agent
 models = {
-    agent_id: {
-        "policy": Policy(observation_spaces[agent_id], action_spaces[agent_id], device),
-        "value": Value(observation_spaces[agent_id], action_spaces[agent_id], device)
+    agent_name : {
+        "policy": Policy(env.observation_space(agent_name), env.action_space(agent_name), device),
+        "value": Value(env.observation_space(agent_name), env.action_space(agent_name), device)
     }
-    for agent_id in agent_ids
+    for agent_name in env.possible_agents
 }
-
 
 # instantiate memories as rollout buffer (any memory can be used for this)
 memories = {}
-for agent_id in agent_ids:
-    memories[agent_id] = RandomMemory(memory_size=24, num_envs=env.num_envs, device=device)
-
+for agent_name in env.possible_agents:
+    memories[agent_name] = RandomMemory(memory_size=1024, num_envs=env.num_envs, device=device)
 
 # 🎛 Configure IPPO Agent
-cfg_agent = IPPO_DEFAULT_CONFIG.copy()
-cfg_agent["rollouts"] = 1024
-cfg_agent["learning_epochs"] = 10
-cfg_agent["mini_batches"] = 32
-cfg_agent["discount_factor"] = 0.99
-cfg_agent["lambda"] = 0.95
-cfg_agent["learning_rate"] = 3e-4
-cfg_agent["entropy_loss_scale"] = 0.01
-cfg_agent["value_loss_scale"] = 0.5
-cfg_agent["clip_predicted_values"] = False
-cfg_agent["grad_norm_clip"] = 0.5
-cfg_agent["ratio_clip"] = 0.2
-cfg_agent["value_clip"] = 0.2
-cfg_agent["kl_threshold"] = 0
-cfg_agent["mixed_precision"] = True
+cfg = IPPO_DEFAULT_CONFIG.copy()
+cfg["rollouts"] = 1024  # memory_size
+cfg["learning_epochs"] = 8
+cfg["mini_batches"] = 8  
+cfg["discount_factor"] = 0.95
+cfg["lambda"] = 0.95
+cfg["learning_rate"] = 3e-4
+cfg["learning_rate_scheduler"] = KLAdaptiveRL
+cfg["learning_rate_scheduler_kwargs"] = {"kl_threshold": 0.008}
+cfg["random_timesteps"] = 0
+cfg["learning_starts"] = 0
+cfg["grad_norm_clip"] = 1.0
+cfg["ratio_clip"] = 0.2
+cfg["value_clip"] = 0.2
+cfg["clip_predicted_values"] = True
+cfg["entropy_loss_scale"] = 0.01
+cfg["value_loss_scale"] = 1.0
+cfg["kl_threshold"] = 0
+cfg["state_preprocessor"] = RunningStandardScaler
+cfg["state_preprocessor_kwargs"] = {"size": next(iter(env.observation_spaces.values())), "device": device}
+cfg["value_preprocessor"] = RunningStandardScaler
+cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 # ✅ Set up logging & checkpoints
-cfg_agent["experiment"]["directory"] = "runs/torch/MultiGrid_IPPO"
-cfg_agent["experiment"]["write_interval"] = 500
-cfg_agent["experiment"]["checkpoint_interval"] = 5000
+cfg["experiment"]["directory"] = "runs/torch/MultiGrid_IPPO"
+cfg["experiment"]["write_interval"] = 500
+cfg["experiment"]["checkpoint_interval"] = 5000
 
-
-# 🏆 Initialize IPPO Agents (Each Agent is Independent)
 training_agent = IPPO(
-        possible_agents = agent_ids,
+        possible_agents=env.possible_agents,
         models=models,
         memories=memories,  
-        cfg=cfg_agent,
-        observation_spaces=observation_spaces,
-        action_spaces=action_spaces,
+        cfg=cfg,
+        observation_spaces=env.observation_spaces,
+        action_spaces=env.action_spaces,
         device=device
     )
 
 # 🏋️ Configure & Start Training
-cfg_trainer = {"timesteps": 500000, "headless": True}
+cfg_trainer = {"timesteps": 100000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=training_agent)
 
 print("🚀 Starting IPPO Training...")
