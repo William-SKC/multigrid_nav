@@ -20,8 +20,8 @@ from minigrid_extractor import MinigridFeaturesExtractor
 set_seed(42)
 
 # ✅ Load & Wrap MultiGrid Environment
-num_agents = 2
-env = gym.make('MultiGrid-Empty-5x5-v0', agents=num_agents)
+num_agents = 3
+env = gym.make('MultiGrid-Empty-Random-6x6-v0', agents=num_agents)
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 env_core = env.unwrapped
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -118,8 +118,8 @@ cfg["value_preprocessor"] = RunningStandardScaler
 cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 # ✅ Set up logging & checkpoints
-cfg["experiment"]["directory"] = "runs/torch/MultiGrid_IPPO"
-cfg["experiment"]["write_interval"] = 500
+cfg["experiment"]["directory"] = "runs/torch/MultiGrid_IPPO_CustomReward"
+cfg["experiment"]["write_interval"] = 1000
 cfg["experiment"]["checkpoint_interval"] = 5000
 
 training_agent = IPPO(
@@ -133,7 +133,7 @@ training_agent = IPPO(
     )
 
 # 🏋️ Configure & Start Training
-cfg_trainer = {"timesteps": 100000, "headless": True}
+cfg_trainer = {"timesteps": 200000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=training_agent)
 
 print("🚀 Starting IPPO Training...")

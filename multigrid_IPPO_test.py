@@ -19,11 +19,12 @@ from skrl.utils import set_seed
 from minigrid_extractor import MinigridFeaturesExtractor  
 
 # ✅ Load the trained PPO model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MultiGrid_IPPO/25-02-18_12-53-34-890578_IPPO/checkpoints/agent_100000.pt"  # Change if needed
-
+CHECKPOINT_PATH = "runs/torch/MultiGrid_IPPO_CustomReward/25-02-21_17-04-28-655584_IPPO/checkpoints/best_agent.pt"  # Change if needed
+# runs/torch/MultiGrid_IPPO/25-02-18_16-03-51-356958_IPPO: Original Reward
 # ✅ Load MultiGrid Environment
-num_agents = 3
-env = gym.make('MultiGrid-Empty-8x8-v0', agents=num_agents, render_mode="rgb_array")
+num_agents = 2
+env = gym.make('MultiGrid-Empty-Random-6x6-v0', agents=num_agents, render_mode="rgb_array")
+
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
