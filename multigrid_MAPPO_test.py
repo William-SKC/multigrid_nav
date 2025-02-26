@@ -4,9 +4,7 @@ import torch.nn as nn
 import numpy as np
 import imageio
 
-
 from multigrid import envs  # Ensure MultiGrid environments are registered
-from skrl.multi_agents.torch.mappo import MAPPO, MAPPO_DEFAULT_CONFIG
 from skrl.multi_agents.torch.mappo import MAPPO, MAPPO_DEFAULT_CONFIG
 from skrl.envs.wrappers.torch import wrap_env
 from skrl.memories.torch import RandomMemory
@@ -23,12 +21,12 @@ from minigrid_extractor import MinigridFeaturesExtractor
 set_seed(42)
 
 # ✅ Load the trained model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_CustomReward/25-02-24_17-30-55-111835_MAPPO/checkpoints/best_agent.pt"  
+CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_CustomReward/25-02-24_17-30-55-111835_MAPPO/checkpoints/agent_200000.pt"  
 
 
 # ✅ Load & Wrap MultiGrid Environment
 num_agents = 3
-env = gym.make('MultiGrid-Empty-Random-6x6-v0', agents=num_agents, render_mode="rgb_array")
+env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents, render_mode="rgb_array")
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -81,7 +79,7 @@ class Value(DeterministicMixin, Model):
 models = {
     agent_name : {
         "policy": Policy(env.observation_space(agent_name), env.action_space(agent_name), device),
-        "value": Value(env.state_space(agent_name), env.action_space(agent_name), device)
+        # "value": Value(env.state_space(agent_name), env.action_space(agent_name), device)
     }
     for agent_name in env.possible_agents
 }
@@ -94,10 +92,10 @@ for agent_name in env.possible_agents:
 cfg = MAPPO_DEFAULT_CONFIG.copy()
 cfg["state_preprocessor"] = RunningStandardScaler
 cfg["state_preprocessor_kwargs"] = {"size": next(iter(env.observation_spaces.values())), "device": device}
-cfg["shared_state_preprocessor"] = RunningStandardScaler
-cfg["shared_state_preprocessor_kwargs"] = {"size": next(iter(env.state_spaces.values())), "device": device}
-cfg["value_preprocessor"] = RunningStandardScaler
-cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
+# cfg["shared_state_preprocessor"] = RunningStandardScaler
+# cfg["shared_state_preprocessor_kwargs"] = {"size": next(iter(env.state_spaces.values())), "device": device}
+# cfg["value_preprocessor"] = RunningStandardScaler
+# cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 trained_agent = MAPPO(
         possible_agents=env.possible_agents,
@@ -119,11 +117,9 @@ obs, _ = env.reset()
 # Run for a fixed number of steps
 max_timesteps = 20000  # Adjust for longer demos
 for timestep in range(max_timesteps):
-    # Get actions from the trained model
-    # for id, ob in obs.items():
-    #     print('obs: ', id, ob.shape)
-    output = trained_agent.act(obs, timestep=timestep, timesteps=max_timesteps)
-    actions = output[-1].get("mean_actions", output[0])
+    with torch.no_grad():
+        output = trained_agent.act(obs, timestep=timestep, timesteps=max_timesteps)
+        actions = output[-1].get("mean_actions", output[0])
 
     # Step the environment
     obs, rewards, terminated, truncated, info = env.step(actions)
