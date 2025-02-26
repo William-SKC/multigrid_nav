@@ -6,7 +6,8 @@ import imageio
 
 
 from multigrid import envs  # Ensure MultiGrid environments are registered
-from skrl.multi_agents.torch.ippo import IPPO, IPPO_DEFAULT_CONFIG
+from skrl.multi_agents.torch.mappo import MAPPO, MAPPO_DEFAULT_CONFIG
+from skrl.multi_agents.torch.mappo import MAPPO, MAPPO_DEFAULT_CONFIG
 from skrl.envs.wrappers.torch import wrap_env
 from skrl.memories.torch import RandomMemory
 from skrl.models.torch import CategoricalMixin, DeterministicMixin, Model
@@ -18,18 +19,20 @@ from skrl.utils import set_seed
 # Import CNN Feature Extractor
 from minigrid_extractor import MinigridFeaturesExtractor  
 
+# ✅ Set seed for reproducibility
+set_seed(42)
+
 # ✅ Load the trained model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MultiGrid_IPPO_CustomReward/25-02-21_17-04-28-655584_IPPO/checkpoints/best_agent.pt"  # Change if needed
+CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_CustomReward/25-02-24_17-30-55-111835_MAPPO/checkpoints/best_agent.pt"  
 
-# ✅ Load MultiGrid Environment
-num_agents = 2
+
+# ✅ Load & Wrap MultiGrid Environment
+num_agents = 3
 env = gym.make('MultiGrid-Empty-Random-6x6-v0', agents=num_agents, render_mode="rgb_array")
-
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# ✅ Get agent IDs dynamically
 
 # 🧠 Define Policy Model (CNN Feature Extractor)
 class Policy(CategoricalMixin, Model):
@@ -78,31 +81,37 @@ class Value(DeterministicMixin, Model):
 models = {
     agent_name : {
         "policy": Policy(env.observation_space(agent_name), env.action_space(agent_name), device),
-        "value": Value(env.observation_space(agent_name), env.action_space(agent_name), device)
+        "value": Value(env.state_space(agent_name), env.action_space(agent_name), device)
     }
     for agent_name in env.possible_agents
 }
+# instantiate memories as rollout buffer (any memory can be used for this)
+memories = {}
+for agent_name in env.possible_agents:
+    memories[agent_name] = RandomMemory(memory_size=1, num_envs=env.num_envs, device=device)
 
-cfg = IPPO_DEFAULT_CONFIG.copy()
+# 🎛 Configure IPPO Agent
+cfg = MAPPO_DEFAULT_CONFIG.copy()
 cfg["state_preprocessor"] = RunningStandardScaler
 cfg["state_preprocessor_kwargs"] = {"size": next(iter(env.observation_spaces.values())), "device": device}
+cfg["shared_state_preprocessor"] = RunningStandardScaler
+cfg["shared_state_preprocessor_kwargs"] = {"size": next(iter(env.state_spaces.values())), "device": device}
 cfg["value_preprocessor"] = RunningStandardScaler
 cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
-# ✅ Load the trained IPPO model
-trained_agent = IPPO(
-        possible_agents = env.possible_agents,
+trained_agent = MAPPO(
+        possible_agents=env.possible_agents,
         models=models,
-        memories=None,  
+        memories=memories,  
         cfg=cfg,
         observation_spaces=env.observation_spaces,
         action_spaces=env.action_spaces,
-        device=device
+        device=device,
+        shared_observation_spaces=env.state_spaces
     )
 
 trained_agent.load(CHECKPOINT_PATH)  # 🔥 Load trained weights
-print(f"✅ Loaded IPPO model from {CHECKPOINT_PATH}")
-
+print(f"✅ Loaded MAPPO model from {CHECKPOINT_PATH}")
 # ✅ Run the agent in the environment and save frames
 frames = []
 obs, _ = env.reset()
@@ -128,7 +137,7 @@ for timestep in range(max_timesteps):
         break
 
 # ✅ Save the GIF
-gif_path = "multigrid_ippo_demo.gif"
+gif_path = "multigrid_mappo_demo.gif"
 imageio.mimsave(gif_path, frames, fps=10)  # Adjust FPS for speed control
 
 print(f"🎬 GIF saved successfully at {gif_path}!")
