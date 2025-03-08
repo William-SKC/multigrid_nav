@@ -1,6 +1,4 @@
-# Adding the GIFs section to the README.md content
-
-updated_readme_content = """# 🚀 Mobile Multi-Robot Navigation using RL
+# 🚀 Mobile Multi-Robot Navigation using RL
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![SKRL](https://img.shields.io/badge/SKRL-1.4.1%2B-green.svg)](https://github.com/Toni-SM/skrl)
