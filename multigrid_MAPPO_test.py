@@ -18,14 +18,17 @@ from skrl.utils import set_seed
 from minigrid_extractor import MinigridFeaturesExtractor  
 
 # ✅ Set seed for reproducibility
-set_seed(42)
+# set_seed(42)
 
 # ✅ Load the trained model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_CustomReward/25-02-24_17-30-55-111835_MAPPO/checkpoints/agent_200000.pt"  
-
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_CustomReward/25-02-24_17-30-55-111835_MAPPO/checkpoints/agent_200000.pt"  
+# CHECKPOINT_PATH = "runs\\torch\\MultiGrid_MAPPO_CustomReward\\25-03-05_00-08-22-951122_MAPPO\\checkpoints\\agent_1000000.pt" #8x8
+# CHECKPOINT_PATH = "runs\\torch\MultiGrid_MAPPO_CustomReward\\25-03-05_11-51-13-133282_MAPPO\\checkpoints\\agent_1000000.pt" #16x16
+# CHECKPOINT_PATH = "runs\\torch\\MultiGrid_MAPPO_CustomReward\\25-03-05_23-12-21-239670_MAPPO\\checkpoints\\agent_2000000.pt" #16x16
+CHECKPOINT_PATH = "runs\\torch\MultiGrid_MAPPO_CustomReward\\25-03-06_23-43-56-433473_MAPPO\\checkpoints\\agent_3000000.pt" #16x16
 
 # ✅ Load & Wrap MultiGrid Environment
-num_agents = 3
+num_agents = 5
 env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents, render_mode="rgb_array")
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 
@@ -79,7 +82,7 @@ class Value(DeterministicMixin, Model):
 models = {
     agent_name : {
         "policy": Policy(env.observation_space(agent_name), env.action_space(agent_name), device),
-        # "value": Value(env.state_space(agent_name), env.action_space(agent_name), device)
+        "value": Value(env.state_space(agent_name), env.action_space(agent_name), device)
     }
     for agent_name in env.possible_agents
 }
@@ -92,10 +95,10 @@ for agent_name in env.possible_agents:
 cfg = MAPPO_DEFAULT_CONFIG.copy()
 cfg["state_preprocessor"] = RunningStandardScaler
 cfg["state_preprocessor_kwargs"] = {"size": next(iter(env.observation_spaces.values())), "device": device}
-# cfg["shared_state_preprocessor"] = RunningStandardScaler
-# cfg["shared_state_preprocessor_kwargs"] = {"size": next(iter(env.state_spaces.values())), "device": device}
-# cfg["value_preprocessor"] = RunningStandardScaler
-# cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
+cfg["shared_state_preprocessor"] = RunningStandardScaler
+cfg["shared_state_preprocessor_kwargs"] = {"size": next(iter(env.state_spaces.values())), "device": device}
+cfg["value_preprocessor"] = RunningStandardScaler
+cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 trained_agent = MAPPO(
         possible_agents=env.possible_agents,

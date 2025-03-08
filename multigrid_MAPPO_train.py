@@ -22,10 +22,11 @@ set_seed(42)
 
 # ✅ Load & Wrap MultiGrid Environment
 num_agents = 3
-env = gym.make('MultiGrid-Empty-Random-6x6-v0', agents=num_agents)
+env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents)
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 env_core = env.unwrapped
 device = "cuda" if torch.cuda.is_available() else "cpu"
+print('Device:', device)
 
 # ✅ Reset environment and check shapes
 obs, _ = env.reset()
@@ -123,8 +124,8 @@ cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 # ✅ Set up logging & checkpoints
 cfg["experiment"]["directory"] = "runs/torch/MultiGrid_MAPPO_CustomReward"
-cfg["experiment"]["write_interval"] = 1000
-cfg["experiment"]["checkpoint_interval"] = 5000
+cfg["experiment"]["write_interval"] = 50000
+cfg["experiment"]["checkpoint_interval"] = 100000
 
 training_agent = MAPPO(
         possible_agents=env.possible_agents,
@@ -138,7 +139,7 @@ training_agent = MAPPO(
     )
 
 # 🏋️ Configure & Start Training
-cfg_trainer = {"timesteps": 200000, "headless": True}
+cfg_trainer = {"timesteps": 4000000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=training_agent)
 
 print("🚀 Starting MAPPO Training...")
