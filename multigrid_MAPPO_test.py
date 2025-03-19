@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 import imageio
 
+
 from multigrid import envs  # Ensure MultiGrid environments are registered
 from skrl.multi_agents.torch.mappo import MAPPO, MAPPO_DEFAULT_CONFIG
 from skrl.envs.wrappers.torch import wrap_env
@@ -24,8 +25,8 @@ from minigrid_extractor import MinigridFeaturesExtractor
 # CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_CustomReward/25-02-24_17-30-55-111835_MAPPO/checkpoints/agent_200000.pt"  
 # CHECKPOINT_PATH = "runs\\torch\\MultiGrid_MAPPO_CustomReward\\25-03-05_00-08-22-951122_MAPPO\\checkpoints\\agent_1000000.pt" #8x8
 # CHECKPOINT_PATH = "runs\\torch\MultiGrid_MAPPO_CustomReward\\25-03-05_11-51-13-133282_MAPPO\\checkpoints\\agent_1000000.pt" #16x16
-# CHECKPOINT_PATH = "runs\\torch\\MultiGrid_MAPPO_CustomReward\\25-03-05_23-12-21-239670_MAPPO\\checkpoints\\agent_2000000.pt" #16x16
-CHECKPOINT_PATH = "runs\\torch\MultiGrid_MAPPO_CustomReward\\25-03-06_23-43-56-433473_MAPPO\\checkpoints\\agent_3000000.pt" #16x16
+CHECKPOINT_PATH = "runs\\torch\\MultiGrid_MAPPO_CustomReward\\25-03-05_23-12-21-239670_MAPPO\\checkpoints\\agent_2000000.pt" #16x16
+# CHECKPOINT_PATH = "runs\\torch\MultiGrid_MAPPO_CustomReward\\25-03-06_23-43-56-433473_MAPPO\\checkpoints\\agent_3000000.pt" #16x16
 
 # ✅ Load & Wrap MultiGrid Environment
 num_agents = 5

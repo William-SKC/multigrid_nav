@@ -1,6 +1,6 @@
 {
     "python.analysis.extraPaths": [
-      "C:/Users/billy/RL/MultiGrid/multigrid",
-      "C:/Users/billy/RL/MultiGrid/SKRL"
+      "C:/Users/billy/RL/MultiGrid",
+      "C:/Users/billy/RL/SKRL"
     ]
 }
