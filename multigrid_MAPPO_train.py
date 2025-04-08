@@ -96,7 +96,7 @@ memories = {}
 for agent_name in env.possible_agents:
     memories[agent_name] = RandomMemory(memory_size=1024, num_envs=env.num_envs, device=device)
 
-# 🎛 Configure IPPO Agent
+# 🎛 Configure MAPPO Agent
 cfg = MAPPO_DEFAULT_CONFIG.copy()
 cfg["rollouts"] = 1024  # memory_size
 cfg["learning_epochs"] = 8

@@ -92,7 +92,7 @@ memories = {}
 for agent_name in env.possible_agents:
     memories[agent_name] = RandomMemory(memory_size=1, num_envs=env.num_envs, device=device)
 
-# 🎛 Configure IPPO Agent
+# 🎛 Configure MAPPO Agent
 cfg = MAPPO_DEFAULT_CONFIG.copy()
 cfg["state_preprocessor"] = RunningStandardScaler
 cfg["state_preprocessor_kwargs"] = {"size": next(iter(env.observation_spaces.values())), "device": device}
