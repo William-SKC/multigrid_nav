@@ -21,14 +21,14 @@ from skrl.utils import set_seed
 from minigrid_extractor import MinigridFeaturesExtractor  
 
 # Set seed for reproducibility (optional)
-set_seed(42)
+# set_seed(42)
 
 # ✅ Load the trained model from checkpoint
-CHECKPOINT_PATH = "" 
+CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-07_21-34-40-851333_MAPPO_RNN/checkpoints/agent_300000.pt" 
 
 # Environment Setup
 num_agents = 3
-env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents)
+env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents, render_mode="rgb_array")
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -224,6 +224,7 @@ trained_agent = MAPPO_RNN(
     )
 
 trained_agent.load(CHECKPOINT_PATH)  # 🔥 Load trained weights
+trained_agent.init()
 print(f"✅ Loaded MAPPO model from {CHECKPOINT_PATH}")
 # ✅ Run the agent in the environment and save frames
 frames = []

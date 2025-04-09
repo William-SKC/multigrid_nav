@@ -24,7 +24,7 @@ set_seed(42)
 
 # Environment Setup
 num_agents = 3
-env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents)
+env = gym.make('MultiGrid-Empty-Random-8x8-v0', agents=num_agents)
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 env_core = env.unwrapped
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -87,7 +87,7 @@ class Policy(CategoricalMixin, Model):
 
             # reset the RNN state in the middle of a sequence
             # TODO: debug may be needed now is an all-or-nothing approach 
-            if terminated is not None and torch.any(terminated): 
+            if terminated is not None and torch.all(terminated): 
                 rnn_outputs = []
                 terminated = terminated.view(-1, self.sequence_length)
                 indexes = [0] + (terminated[:,:-1].any(dim=0).nonzero(as_tuple=True)[0] + 1).tolist() + [self.sequence_length]
