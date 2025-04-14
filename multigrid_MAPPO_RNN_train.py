@@ -24,8 +24,8 @@ set_seed(42)
 
 # Environment Setup
 num_agents = 3
-env = gym.make('MultiGrid-Empty-Random-8x8-v0', agents=num_agents)
-env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
+env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents)
+env = wrap_env(env, wrapper="multigrid")  # Required for SKRL 
 env_core = env.unwrapped
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print('Device:', device)
@@ -233,8 +233,8 @@ cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 # ✅ Set up logging & checkpoints
 cfg["experiment"]["directory"] = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward"
-cfg["experiment"]["write_interval"] = 5000
-cfg["experiment"]["checkpoint_interval"] = 10000
+cfg["experiment"]["write_interval"] = 50000
+cfg["experiment"]["checkpoint_interval"] = 100000
 
 training_agent = MAPPO_RNN(
         possible_agents=env.possible_agents,
@@ -248,7 +248,7 @@ training_agent = MAPPO_RNN(
     )
 
 # 🏋️ Configure & Start Training
-cfg_trainer = {"timesteps": 300000, "headless": True}
+cfg_trainer = {"timesteps": 1000000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=training_agent)
 
 print("🚀 Starting MAPPO Training...")

@@ -24,7 +24,9 @@ from minigrid_extractor import MinigridFeaturesExtractor
 # set_seed(42)
 
 # ✅ Load the trained model from checkpoint
-CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-07_21-34-40-851333_MAPPO_RNN/checkpoints/agent_300000.pt" 
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-08_22-47-32-121968_MAPPO_RNN/checkpoints/agent_280000.pt" #8x8
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-10_11-02-32-232466_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16
+CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-11_15-04-49-850836_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16
 
 # Environment Setup
 num_agents = 3
