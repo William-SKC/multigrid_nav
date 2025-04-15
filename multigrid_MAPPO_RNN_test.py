@@ -25,11 +25,11 @@ from minigrid_extractor import MinigridFeaturesExtractor
 
 # ✅ Load the trained model from checkpoint
 # CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-08_22-47-32-121968_MAPPO_RNN/checkpoints/agent_280000.pt" #8x8
-# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-10_11-02-32-232466_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16
-CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-11_15-04-49-850836_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16
-
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-10_11-02-32-232466_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16 (view size 7)
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-11_15-04-49-850836_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16 (view size 13)
+CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-13_20-59-13-057158_MAPPO_RNN/checkpoints/agent_1000000.pt"  #16 x16 (view size 15)
 # Environment Setup
-num_agents = 3
+num_agents = 5
 env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents, render_mode="rgb_array")
 env = wrap_env(env, wrapper="multigrid")  # ✅ Required for PyTorch training
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -208,11 +208,6 @@ cfg["shared_state_preprocessor"] = RunningStandardScaler
 cfg["shared_state_preprocessor_kwargs"] = {"size": next(iter(env.state_spaces.values())), "device": device}
 cfg["value_preprocessor"] = RunningStandardScaler
 cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
-
-# ✅ Set up logging & checkpoints
-cfg["experiment"]["directory"] = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward"
-cfg["experiment"]["write_interval"] = 5000
-cfg["experiment"]["checkpoint_interval"] = 10000
 
 trained_agent = MAPPO_RNN(
         possible_agents=env.possible_agents,

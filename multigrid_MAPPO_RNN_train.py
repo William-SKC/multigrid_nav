@@ -233,8 +233,8 @@ cfg["value_preprocessor_kwargs"] = {"size": 1, "device": device}
 
 # ✅ Set up logging & checkpoints
 cfg["experiment"]["directory"] = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward"
-cfg["experiment"]["write_interval"] = 50000
-cfg["experiment"]["checkpoint_interval"] = 100000
+cfg["experiment"]["write_interval"] = 1000
+cfg["experiment"]["checkpoint_interval"] = 2000
 
 training_agent = MAPPO_RNN(
         possible_agents=env.possible_agents,
@@ -248,7 +248,7 @@ training_agent = MAPPO_RNN(
     )
 
 # 🏋️ Configure & Start Training
-cfg_trainer = {"timesteps": 1000000, "headless": True}
+cfg_trainer = {"timesteps": 10000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=training_agent)
 
 print("🚀 Starting MAPPO Training...")
