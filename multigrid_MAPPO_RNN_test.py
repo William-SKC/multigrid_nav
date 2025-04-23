@@ -27,7 +27,9 @@ from minigrid_extractor import MinigridFeaturesExtractor
 # CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-08_22-47-32-121968_MAPPO_RNN/checkpoints/agent_280000.pt" #8x8
 # CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-10_11-02-32-232466_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16 (view size 7)
 # CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-11_15-04-49-850836_MAPPO_RNN/checkpoints/agent_1000000.pt" #16 x16 (view size 13)
-CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-13_20-59-13-057158_MAPPO_RNN/checkpoints/agent_1000000.pt"  #16 x16 (view size 15)
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-15_10-57-54-803991_MAPPO_RNN/checkpoints/agent_1000000.pt"  #16 x16 (view size 15)
+# CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-16_23-33-57-231276_MAPPO_RNN/checkpoints/agent_1000000.pt"  #16 x16 (view size 11)
+CHECKPOINT_PATH = "runs/torch/MultiGrid_MAPPO_RNN_CustomReward/25-04-21_22-39-57-676108_MAPPO_RNN/checkpoints/agent_1000000.pt"  #16 x16 (view size 11)
 # Environment Setup
 num_agents = 5
 env = gym.make('MultiGrid-Empty-Random-16x16-v0', agents=num_agents, render_mode="rgb_array")
